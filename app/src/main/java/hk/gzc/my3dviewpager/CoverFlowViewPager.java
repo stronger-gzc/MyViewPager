@@ -83,13 +83,15 @@ public class CoverFlowViewPager extends RelativeLayout implements OnPageSelectLi
             // 设置padding 值，默认缩小
             layout.setScaleX(0.83f);
             layout.setScaleY(0.83f);
-//            layout.setAlpha(0.5f);
+            layout.setAlpha(0.5f);
             layout.setTranslationX(mAdapter.dp2px(-60));
             layout.addView(view);
             mViewList.add(layout);
         }
         // 刷新数据
         mAdapter.notifyDataSetChanged();
+        mViewList.get(0).bringToFront();
+
     }
 
 

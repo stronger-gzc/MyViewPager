@@ -3,6 +3,7 @@ package hk.gzc.my3dviewpager;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,10 @@ public class CoverFlowAdapter extends PagerAdapter implements ViewPager.OnPageCh
      */
     private Context mContext;
 
-    private int mState;
+    //0:停止  1:用户进行拖动  2：用户松开后缓冲滑动的过程
+//    private int mState;
+
+    private float mPositionOffset=0;
 
     public CoverFlowAdapter(List<View> mImageViewList, Context context) {
         this.mViewList = mImageViewList;
@@ -62,29 +66,41 @@ public class CoverFlowAdapter extends PagerAdapter implements ViewPager.OnPageCh
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
         // 该方法回调ViewPager 的滑动偏移量
         if (mViewList.size() > 0 && position < mViewList.size()) {
             //当前手指触摸滑动的页面,从0页滑动到1页 offset越来越大，padding越来越大
-            mViewList.get(position).setScaleX(1-positionOffset*0.17f);
-            mViewList.get(position).setScaleY(1-positionOffset*0.17f);
-            mViewList.get(position).setTranslationX(dp2px(60)*positionOffset);
+            mViewList.get(position).setScaleX(1 - positionOffset * 0.17f);
+            mViewList.get(position).setScaleY(1 - positionOffset * 0.17f);
+            mViewList.get(position).setAlpha(1 - positionOffset * 0.5f);
+            mViewList.get(position).setTranslationX(dp2px(60) * positionOffset);
 
             // position+1 为即将显示的页面，越来越大
             if (position < mViewList.size() - 1) {
-                mViewList.get(position+1).setScaleX(0.83f+positionOffset*0.17f);
-                mViewList.get(position+1).setScaleY(0.83f+positionOffset*0.17f);
-                mViewList.get(position+1).setTranslationX(dp2px(60)*(positionOffset-1));
-                if(mState!=2){
-                    mViewList.get(position+1).bringToFront();
+                mViewList.get(position + 1).setScaleX(0.83f + positionOffset * 0.17f);
+                mViewList.get(position + 1).setScaleY(0.83f + positionOffset * 0.17f);
+                mViewList.get(position + 1).setAlpha(0.5f + positionOffset * 0.5f);
+                mViewList.get(position + 1).setTranslationX(dp2px(60) * (positionOffset - 1));
+                if(positionOffset>=mPositionOffset) {
+                    if (positionOffset >= 0.7f) {
+                        mViewList.get(position + 1).bringToFront();
+                    }else if(positionOffset==0&&position==0){
+                        mViewList.get(position).bringToFront();
+                    }
+                }else{
+                    if(positionOffset<=0.6f){
+                        mViewList.get(position).bringToFront();
+                    }
                 }
-                if(position<mViewList.size()-2){
-                    mViewList.get(position+2).setScaleX(0.66f+positionOffset*0.17f);
-                    mViewList.get(position+2).setScaleY(0.66f+positionOffset*0.17f);
-                    mViewList.get(position+2).setTranslationX(dp2px(-60)*positionOffset);
+
+                if (position < mViewList.size() - 2) {
+                    mViewList.get(position + 2).setScaleX(0.66f + positionOffset * 0.17f);
+                    mViewList.get(position + 2).setScaleY(0.66f + positionOffset * 0.17f);
+                    mViewList.get(position + 2).setTranslationX(dp2px(-60) * positionOffset);
                 }
             }
         }
-
+        mPositionOffset=positionOffset;
     }
 
     @Override
@@ -97,7 +113,7 @@ public class CoverFlowAdapter extends PagerAdapter implements ViewPager.OnPageCh
 
     @Override
     public void onPageScrollStateChanged(int state) {
-        mState=state;
+//        mState = state;
     }
 
     /**
